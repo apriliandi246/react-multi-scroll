@@ -4,7 +4,7 @@
 
 ### 👨‍💻 About
 
-Multiscroll (dekstop) implement on React JS
+Multiscroll (dekstop) implement on React JS (on progress)
 
 <h3 align="center">. . .</h3>
 
