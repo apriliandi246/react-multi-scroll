@@ -6,23 +6,111 @@ import FullSlide from "./components/Slide/FullSlide";
 import NavButton from "./components/NavigationButton/Button";
 import NavButtonsContainer from "./components/NavigationButton/Container";
 
+import isDekstopView from "./utils/isDekstopView";
+import useThrottle from "./hooks/useThrottle";
+
 const TOTAL_SLIDE = 12;
 const FULL_SLIDE_NUMBERS = [0, 2, 7];
 const MULTI_SLIDE_NUMBERS = [1, 3, 4, 5, 6, 8, 9, 10, 11];
 const calculatedPositionLists = Array.from({ length: TOTAL_SLIDE }, (_, index) => index * 100);
+
+const HOME = "Home";
+const END = "End";
+const ARROW_UP = "ArrowUp";
+const ARROW_DOWN = "ArrowDown";
+const PAGE_UP = "PageUp";
+const PAGE_DOWN = "PageDown";
 
 function App() {
 	const [isSlideNavigating, setSlideNavigatingProcess] = useState(false);
 	const [currentActiveSlideNumber, setCurrentActiveSlideNumber] = useState(0);
 	const [positionLists, setPositionLists] = useState([...calculatedPositionLists]);
 
+	const throttleKeyboardNav = useThrottle(keydownKeyboardNavigate, 610);
+
 	useEffect(() => {
-		document.addEventListener("keydown", keydownKeyboardNavigate);
+		document.addEventListener("keydown", throttleKeyboardNav);
 
 		return () => {
-			document.removeEventListener("keydown", keydownKeyboardNavigate);
+			document.removeEventListener("keydown", throttleKeyboardNav);
 		};
-	}, [currentActiveSlideNumber]);
+	}, [currentActiveSlideNumber, positionLists]);
+
+	function navBtnNavigate(btnNumber) {
+		if (isDekstopView === false) return;
+		if (isSlideNavigating === true) return;
+		if (btnNumber === currentActiveSlideNumber) return;
+
+		setSlideNavigatingProcess(true);
+
+		const slidesComparisonNumber = Math.abs(currentActiveSlideNumber - btnNumber);
+
+		if (slidesComparisonNumber === 1) {
+			if (btnNumber > currentActiveSlideNumber) {
+				oneTimeSlide("bottom");
+			}
+
+			if (btnNumber < currentActiveSlideNumber) {
+				oneTimeSlide("top");
+			}
+		}
+
+		if (slidesComparisonNumber > 1) {
+			if (btnNumber > currentActiveSlideNumber) {
+				multipleTimesSlide("bottom", slidesComparisonNumber);
+			}
+
+			if (btnNumber < currentActiveSlideNumber) {
+				multipleTimesSlide("top", slidesComparisonNumber);
+			}
+		}
+
+		setCurrentActiveSlideNumber(btnNumber);
+		setSlideNavigatingProcess(false);
+	}
+
+	function keydownKeyboardNavigate(event) {
+		if (isDekstopView === false) return;
+		if (isSlideNavigating === true) return;
+
+		setSlideNavigatingProcess(true);
+
+		const keyboardKey = event.key;
+
+		if (keyboardKey === HOME && currentActiveSlideNumber !== 0) {
+			multipleTimesSlide("top", currentActiveSlideNumber);
+			setCurrentActiveSlideNumber(0);
+		}
+
+		if (keyboardKey === ARROW_DOWN || keyboardKey === PAGE_DOWN) {
+			const lastSlideNumber = positionLists.length - 1;
+
+			if (currentActiveSlideNumber !== lastSlideNumber) {
+				oneTimeSlide("bottom");
+				setCurrentActiveSlideNumber((prevState) => prevState + 1);
+			}
+		}
+
+		if (keyboardKey === ARROW_UP || keyboardKey === PAGE_UP) {
+			if (currentActiveSlideNumber !== 0) {
+				oneTimeSlide("top");
+				setCurrentActiveSlideNumber((prevState) => prevState - 1);
+			}
+		}
+
+		if (keyboardKey === END) {
+			const lastSlideNumber = positionLists.length - 1;
+
+			if (currentActiveSlideNumber !== lastSlideNumber) {
+				const slideComparison = Math.abs(currentActiveSlideNumber - lastSlideNumber);
+
+				multipleTimesSlide("bottom", slideComparison);
+				setCurrentActiveSlideNumber(lastSlideNumber);
+			}
+		}
+
+		setSlideNavigatingProcess(false);
+	}
 
 	function oneTimeSlide(direction) {
 		let newPosition;
@@ -61,89 +149,6 @@ function App() {
 		}
 
 		setPositionLists(positionListsArr);
-	}
-
-	function navBtnNavigate(btnNumber) {
-		if (isSlideNavigating === true) return;
-		if (btnNumber === currentActiveSlideNumber) return;
-
-		setSlideNavigatingProcess(true);
-
-		const slidesComparisonNumber = Math.abs(currentActiveSlideNumber - btnNumber);
-
-		if (slidesComparisonNumber === 1) {
-			if (btnNumber > currentActiveSlideNumber) {
-				oneTimeSlide("bottom");
-			}
-
-			if (btnNumber < currentActiveSlideNumber) {
-				oneTimeSlide("top");
-			}
-		}
-
-		if (slidesComparisonNumber > 1) {
-			if (btnNumber > currentActiveSlideNumber) {
-				multipleTimesSlide("bottom", slidesComparisonNumber);
-			}
-
-			if (btnNumber < currentActiveSlideNumber) {
-				multipleTimesSlide("top", slidesComparisonNumber);
-			}
-		}
-
-		setCurrentActiveSlideNumber(btnNumber);
-		setSlideNavigatingProcess(false);
-	}
-
-	function keydownKeyboardNavigate(event) {
-		if (isSlideNavigating === true) return;
-
-		const HOME = "Home";
-		const END = "End";
-		const ARROW_UP = "ArrowUp";
-		const ARROW_DOWN = "ArrowDown";
-		const PAGE_UP = "PageUp";
-		const PAGE_DOWN = "PageDown";
-
-		setSlideNavigatingProcess(true);
-
-		const keyboardKey = event.key;
-
-		if (keyboardKey === HOME && currentActiveSlideNumber !== 0) {
-			multipleTimesSlide("top", currentActiveSlideNumber);
-			setCurrentActiveSlideNumber(0);
-			setSlideNavigatingProcess(false);
-		}
-
-		if (keyboardKey === ARROW_DOWN || keyboardKey === PAGE_DOWN) {
-			const lastSlideNumber = positionLists.length - 1;
-
-			if (currentActiveSlideNumber !== lastSlideNumber) {
-				oneTimeSlide("bottom");
-				setCurrentActiveSlideNumber((prevState) => prevState + 1);
-				setSlideNavigatingProcess(false);
-			}
-		}
-
-		if (keyboardKey === ARROW_UP || keyboardKey === PAGE_UP) {
-			if (currentActiveSlideNumber !== 0) {
-				oneTimeSlide("top");
-				setCurrentActiveSlideNumber((prevState) => prevState - 1);
-				setSlideNavigatingProcess(false);
-			}
-		}
-
-		if (keyboardKey === END) {
-			const lastSlideNumber = positionLists.length - 1;
-
-			if (currentActiveSlideNumber !== lastSlideNumber) {
-				const slideComparison = Math.abs(currentActiveSlideNumber - lastSlideNumber);
-
-				multipleTimesSlide("bottom", slideComparison);
-				setCurrentActiveSlideNumber(lastSlideNumber);
-				setSlideNavigatingProcess(false);
-			}
-		}
 	}
 
 	return (
