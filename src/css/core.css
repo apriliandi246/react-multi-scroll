@@ -53,7 +53,7 @@
 }
 
 @media screen and (max-width: 768px) {
-	body {
+	#root {
 		width: auto;
 		height: auto;
 		overflow-y: visible;
