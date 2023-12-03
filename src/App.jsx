@@ -23,15 +23,17 @@ const PAGE_UP = "PageUp";
 const PAGE_DOWN = "PageDown";
 
 function App() {
+	const [isMobileView, setIsMobileView] = useState(false);
 	const [isSlideNavigating, setSlideNavigatingProcess] = useState(false);
 	const [currentActiveSlideNumber, setCurrentActiveSlideNumber] = useState(0);
 	const [positionLists, setPositionLists] = useState([...calculatedPositionLists]);
-	const [isMobileView, setMobileViewStatus] = useState(false);
 
 	const throttleKeyboardNav = useThrottle(keydownKeyboardNavigate, 610);
-	const debouncedResizeHandler = useDebounce(resizeHandler, 300);
+	const debouncedResizeHandler = useDebounce(setViewportSizeStatus, 300);
 
 	useEffect(() => {
+		setViewportSizeStatus();
+
 		window.addEventListener("resize", debouncedResizeHandler);
 
 		return () => {
@@ -48,7 +50,7 @@ function App() {
 	}, [currentActiveSlideNumber, positionLists]);
 
 	function navBtnNavigate(btnNumber) {
-		if (isDekstopView === false) return;
+		if (isDekstopView() === false) return;
 		if (isSlideNavigating === true) return;
 		if (btnNumber === currentActiveSlideNumber) return;
 
@@ -81,7 +83,7 @@ function App() {
 	}
 
 	function keydownKeyboardNavigate(event) {
-		if (isDekstopView === false) return;
+		if (isDekstopView() === false) return;
 		if (isSlideNavigating === true) return;
 
 		setSlideNavigatingProcess(true);
@@ -162,11 +164,13 @@ function App() {
 		setPositionLists(positionListsArr);
 	}
 
-	function resizeHandler() {
+	function setViewportSizeStatus() {
 		if (isDekstopView() === false) {
-			setMobileViewStatus(true);
-		} else {
-			setMobileViewStatus(false);
+			setIsMobileView(true);
+		}
+
+		if (isDekstopView() === true) {
+			setIsMobileView(false);
 		}
 	}
 
