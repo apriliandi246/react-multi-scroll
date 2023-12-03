@@ -8,6 +8,7 @@ import NavButtonsContainer from "./components/NavigationButton/Container";
 
 import isDekstopView from "./utils/isDekstopView";
 import useThrottle from "./hooks/useThrottle";
+import useDebounce from "./hooks/useDebounce";
 
 const TOTAL_SLIDE = 12;
 const FULL_SLIDE_NUMBERS = [0, 2, 7];
@@ -25,8 +26,18 @@ function App() {
 	const [isSlideNavigating, setSlideNavigatingProcess] = useState(false);
 	const [currentActiveSlideNumber, setCurrentActiveSlideNumber] = useState(0);
 	const [positionLists, setPositionLists] = useState([...calculatedPositionLists]);
+	const [isMobileView, setMobileViewStatus] = useState(false);
 
 	const throttleKeyboardNav = useThrottle(keydownKeyboardNavigate, 610);
+	const debouncedResizeHandler = useDebounce(resizeHandler, 300);
+
+	useEffect(() => {
+		window.addEventListener("resize", debouncedResizeHandler);
+
+		return () => {
+			window.removeEventListener("resize", debouncedResizeHandler);
+		};
+	}, []);
 
 	useEffect(() => {
 		document.addEventListener("keydown", throttleKeyboardNav);
@@ -151,6 +162,14 @@ function App() {
 		setPositionLists(positionListsArr);
 	}
 
+	function resizeHandler() {
+		if (isDekstopView() === false) {
+			setMobileViewStatus(true);
+		} else {
+			setMobileViewStatus(false);
+		}
+	}
+
 	return (
 		<>
 			<NavButtonsContainer>
@@ -171,6 +190,7 @@ function App() {
 							<MultiSlide
 								key={index}
 								slideNumber={index}
+								isMobileView={isMobileView}
 								slidePosition={slidePosition}
 								activeSlideNumber={currentActiveSlideNumber}
 							/>
@@ -182,6 +202,7 @@ function App() {
 							<FullSlide
 								key={index}
 								slideNumber={index}
+								isMobileView={isMobileView}
 								slidePosition={slidePosition}
 								activeSlideNumber={currentActiveSlideNumber}
 							/>
