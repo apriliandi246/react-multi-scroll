@@ -28,7 +28,7 @@ function App() {
 	const [currentActiveSlideNumber, setCurrentActiveSlideNumber] = useState(0);
 	const [positionLists, setPositionLists] = useState([...calculatedPositionLists]);
 
-	const throttleKeyboardNav = useThrottle(keydownKeyboardNavigate, 610);
+	const throttleKeyboardNav = useThrottle(keydownNavigateHandler, 610);
 	const debouncedResizeHandler = useDebounce(setViewportSizeStatus, 300);
 
 	useEffect(() => {
@@ -49,7 +49,7 @@ function App() {
 		};
 	}, [currentActiveSlideNumber, positionLists]);
 
-	function navBtnNavigate(btnNumber) {
+	function navBtnNavHandler(btnNumber) {
 		if (isDekstopView() === false) return;
 		if (isSlideNavigating === true) return;
 		if (btnNumber === currentActiveSlideNumber) return;
@@ -60,21 +60,21 @@ function App() {
 
 		if (slidesComparisonNumber === 1) {
 			if (btnNumber > currentActiveSlideNumber) {
-				oneTimeSlide("bottom");
+				oneTimeSlideNavigate("bottom");
 			}
 
 			if (btnNumber < currentActiveSlideNumber) {
-				oneTimeSlide("top");
+				oneTimeSlideNavigate("top");
 			}
 		}
 
 		if (slidesComparisonNumber > 1) {
 			if (btnNumber > currentActiveSlideNumber) {
-				multipleTimesSlide("bottom", slidesComparisonNumber);
+				multipleTimesSlideNavigate("bottom", slidesComparisonNumber);
 			}
 
 			if (btnNumber < currentActiveSlideNumber) {
-				multipleTimesSlide("top", slidesComparisonNumber);
+				multipleTimesSlideNavigate("top", slidesComparisonNumber);
 			}
 		}
 
@@ -82,7 +82,7 @@ function App() {
 		setSlideNavigatingProcess(false);
 	}
 
-	function keydownKeyboardNavigate(event) {
+	function keydownNavigateHandler(event) {
 		if (isDekstopView() === false) return;
 		if (isSlideNavigating === true) return;
 
@@ -91,7 +91,7 @@ function App() {
 		const keyboardKey = event.key;
 
 		if (keyboardKey === HOME && currentActiveSlideNumber !== 0) {
-			multipleTimesSlide("top", currentActiveSlideNumber);
+			multipleTimesSlideNavigate("top", currentActiveSlideNumber);
 			setCurrentActiveSlideNumber(0);
 		}
 
@@ -99,14 +99,14 @@ function App() {
 			const lastSlideNumber = positionLists.length - 1;
 
 			if (currentActiveSlideNumber !== lastSlideNumber) {
-				oneTimeSlide("bottom");
+				oneTimeSlideNavigate("bottom");
 				setCurrentActiveSlideNumber((prevState) => prevState + 1);
 			}
 		}
 
 		if (keyboardKey === ARROW_UP || keyboardKey === PAGE_UP) {
 			if (currentActiveSlideNumber !== 0) {
-				oneTimeSlide("top");
+				oneTimeSlideNavigate("top");
 				setCurrentActiveSlideNumber((prevState) => prevState - 1);
 			}
 		}
@@ -117,7 +117,7 @@ function App() {
 			if (currentActiveSlideNumber !== lastSlideNumber) {
 				const slideComparison = Math.abs(currentActiveSlideNumber - lastSlideNumber);
 
-				multipleTimesSlide("bottom", slideComparison);
+				multipleTimesSlideNavigate("bottom", slideComparison);
 				setCurrentActiveSlideNumber(lastSlideNumber);
 			}
 		}
@@ -125,7 +125,7 @@ function App() {
 		setSlideNavigatingProcess(false);
 	}
 
-	function oneTimeSlide(direction) {
+	function oneTimeSlideNavigate(direction) {
 		let newPosition;
 		const positionListsArr = [...positionLists];
 
@@ -143,7 +143,7 @@ function App() {
 		}
 	}
 
-	function multipleTimesSlide(direction, distance) {
+	function multipleTimesSlideNavigate(direction, distance) {
 		let newPosition;
 		const positionListsArr = [...positionLists];
 
@@ -182,7 +182,7 @@ function App() {
 						key={index}
 						btnNumber={index}
 						currentActiveSlideNumber={currentActiveSlideNumber}
-						onClickHandler={navBtnNavigate}
+						onClickHandler={navBtnNavHandler}
 					/>
 				))}
 			</NavButtonsContainer>

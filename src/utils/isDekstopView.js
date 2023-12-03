@@ -4,7 +4,9 @@ function isDekstopView() {
 
 	if (currentViewportWidth > DEKSTOP_SIZE_MINIMUM) {
 		return true;
-	} else {
+	}
+
+	if (currentViewportWidth < DEKSTOP_SIZE_MINIMUM) {
 		return false;
 	}
 }
