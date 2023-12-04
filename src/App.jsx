@@ -6,10 +6,10 @@ import FullSlide from "./components/Slide/FullSlide";
 import NavButton from "./components/NavigationButton/Button";
 import NavButtonsContainer from "./components/NavigationButton/Container";
 
-import isDekstopView from "./utils/isDekstopView";
 import useThrottle from "./hooks/useThrottle";
 import useDebounce from "./hooks/useDebounce";
 import useWheelOnce from "./hooks/useWheelOnce";
+import isDekstopView from "./utils/isDekstopView";
 
 const TOTAL_SLIDE = 12;
 const FULL_SLIDE_NUMBERS = [0, 2, 7];
@@ -29,43 +29,27 @@ function App() {
 	const [currentActiveSlideNumber, setCurrentActiveSlideNumber] = useState(0);
 	const [positionLists, setPositionLists] = useState([...calculatedPositionLists]);
 
+	const onceWheelHandler = useWheelOnce(wheelNavigation);
 	const throttleKeyboardNav = useThrottle(keydownNavigateHandler, 610);
 	const debouncedResizeHandler = useDebounce(setViewportSizeStatus, 300);
-
-	useWheelOnce(wheelNavigation);
-
-	function wheelNavigation(direction) {
-		if (isDekstopView === false) return;
-		if (isSlideNavigating === true) return;
-
-		setSlideNavigatingProcess(true);
-
-		if (direction === "bottom") {
-			if (currentActiveSlideNumber !== positionLists.length - 1) {
-				oneTimeSlideNavigate("bottom");
-				setCurrentActiveSlideNumber((prevState) => prevState + 1);
-			}
-		}
-
-		if (direction === "top") {
-			if (currentActiveSlideNumber !== 0) {
-				oneTimeSlideNavigate("top");
-				setCurrentActiveSlideNumber((prevState) => prevState - 1);
-			}
-		}
-
-		setSlideNavigatingProcess(false);
-	}
 
 	useEffect(() => {
 		setViewportSizeStatus();
 
-		document.addEventListener("resize", debouncedResizeHandler);
+		window.addEventListener("resize", debouncedResizeHandler);
 
 		return () => {
-			document.removeEventListener("resize", debouncedResizeHandler);
+			window.removeEventListener("resize", debouncedResizeHandler);
 		};
 	}, []);
+
+	useEffect(() => {
+		document.addEventListener("wheel", onceWheelHandler);
+
+		return () => {
+			document.removeEventListener("wheel", onceWheelHandler);
+		};
+	}, [currentActiveSlideNumber]);
 
 	useEffect(() => {
 		document.addEventListener("keydown", throttleKeyboardNav);
@@ -73,46 +57,41 @@ function App() {
 		return () => {
 			document.removeEventListener("keydown", throttleKeyboardNav);
 		};
-	}, [currentActiveSlideNumber, positionLists]);
+	}, [currentActiveSlideNumber]);
 
 	function navBtnNavHandler(btnNumber) {
-		if (isDekstopView() === false) return;
-		if (isSlideNavigating === true) return;
+		if (isDekstopView() === false) return false;
 		if (btnNumber === currentActiveSlideNumber) return;
 
-		setSlideNavigatingProcess(true);
-
 		const slidesComparisonNumber = Math.abs(currentActiveSlideNumber - btnNumber);
+		const direction = btnNumber > currentActiveSlideNumber ? "bottom" : "top";
+		const navHandler = slidesComparisonNumber === 1 ? "single" : "multiple";
 
-		if (slidesComparisonNumber === 1) {
-			if (btnNumber > currentActiveSlideNumber) {
+		if (navHandler === "single") {
+			if (direction === "bottom") {
 				oneTimeSlideNavigate("bottom");
 			}
 
-			if (btnNumber < currentActiveSlideNumber) {
+			if (direction === "top") {
 				oneTimeSlideNavigate("top");
 			}
 		}
 
-		if (slidesComparisonNumber > 1) {
-			if (btnNumber > currentActiveSlideNumber) {
+		if (navHandler === "multiple") {
+			if (direction === "bottom") {
 				multipleTimesSlideNavigate("bottom", slidesComparisonNumber);
 			}
 
-			if (btnNumber < currentActiveSlideNumber) {
+			if (direction === "top") {
 				multipleTimesSlideNavigate("top", slidesComparisonNumber);
 			}
 		}
 
 		setCurrentActiveSlideNumber(btnNumber);
-		setSlideNavigatingProcess(false);
 	}
 
 	function keydownNavigateHandler(event) {
-		if (isDekstopView() === false) return;
-		if (isSlideNavigating === true) return;
-
-		setSlideNavigatingProcess(true);
+		if (isDekstopView() === false) return false;
 
 		const keyboardKey = event.key;
 
@@ -147,11 +126,43 @@ function App() {
 				setCurrentActiveSlideNumber(lastSlideNumber);
 			}
 		}
+	}
 
-		setSlideNavigatingProcess(false);
+	function wheelNavigation(direction) {
+		if (isDekstopView() === false) return false;
+
+		if (direction === "bottom") {
+			if (currentActiveSlideNumber !== positionLists.length - 1) {
+				oneTimeSlideNavigate("bottom");
+				setCurrentActiveSlideNumber((prevState) => prevState + 1);
+
+				console.log("test");
+			}
+		}
+
+		if (direction === "top") {
+			if (currentActiveSlideNumber !== 0) {
+				oneTimeSlideNavigate("top");
+				setCurrentActiveSlideNumber((prevState) => prevState - 1);
+			}
+		}
+	}
+
+	function setViewportSizeStatus() {
+		if (isDekstopView() === false) {
+			setIsMobileView(true);
+		}
+
+		if (isDekstopView() === true) {
+			setIsMobileView(false);
+		}
 	}
 
 	function oneTimeSlideNavigate(direction) {
+		if (isSlideNavigating === true) return;
+
+		setSlideNavigatingProcess(true);
+
 		let newPosition;
 		const positionListsArr = [...positionLists];
 
@@ -167,9 +178,15 @@ function App() {
 			positionListsArr[positionIdx] = newPosition;
 			setPositionLists(positionListsArr);
 		}
+
+		setSlideNavigatingProcess(false);
 	}
 
 	function multipleTimesSlideNavigate(direction, distance) {
+		if (isSlideNavigating === true) return;
+
+		setSlideNavigatingProcess(true);
+
 		let newPosition;
 		const positionListsArr = [...positionLists];
 
@@ -188,16 +205,7 @@ function App() {
 		}
 
 		setPositionLists(positionListsArr);
-	}
-
-	function setViewportSizeStatus() {
-		if (isDekstopView() === false) {
-			setIsMobileView(true);
-		}
-
-		if (isDekstopView() === true) {
-			setIsMobileView(false);
-		}
+		setSlideNavigatingProcess(false);
 	}
 
 	return (

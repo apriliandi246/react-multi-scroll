@@ -1,16 +1,16 @@
 import { useRef } from "react";
 
-function useThrottle(func, delay) {
-	let timeOut = useRef(null);
-	let isCanRun = useRef(true);
+function useThrottle(callback, delay) {
+	const isCanRun = useRef(true);
+	const timeoutID = useRef(null);
 
 	return function (...args) {
 		if (isCanRun.current === true) {
-			func.apply(this, args);
+			callback.apply(this, args);
 
 			isCanRun.current = false;
 
-			timeOut.current = setTimeout(() => {
+			timeoutID.current = setTimeout(() => {
 				isCanRun.current = true;
 			}, delay);
 		}

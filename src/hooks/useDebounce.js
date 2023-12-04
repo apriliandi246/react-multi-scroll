@@ -1,16 +1,16 @@
 import { useRef } from "react";
 
-function useDebounce(func, delay) {
-	const timer = useRef(null);
+function useDebounce(callback, delay) {
+	const timeoutID = useRef(null);
 
 	return function (...args) {
-		if (timer.current) {
-			clearTimeout(timer.current);
-			timer.current = null;
+		if (timeoutID.current) {
+			clearTimeout(timeoutID.current);
+			timeoutID.current = null;
 		}
 
-		timer.current = setTimeout(() => {
-			func.apply(this, args);
+		timeoutID.current = setTimeout(() => {
+			callback.apply(this, args);
 		}, delay);
 	};
 }

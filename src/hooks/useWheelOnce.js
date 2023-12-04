@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 
 const DELTA_THRESHOLD = 50;
 const NOISE_THRESHOLD = 20;
@@ -10,7 +10,7 @@ function useWheelOnce(callback) {
 	const isWheelLock = useRef(false);
 	const wheelLockTimer = useRef(null);
 
-	function wheelListener(event) {
+	return function (event) {
 		const delta = event.deltaY * -1;
 		const absDelta = Math.abs(delta);
 		const currentTimeStamp = event.timeStamp;
@@ -53,15 +53,7 @@ function useWheelOnce(callback) {
 			wheelPower.current = DELTA_THRESHOLD;
 			isWheelLock.current = false;
 		}
-	}
-
-	useEffect(() => {
-		document.addEventListener("wheel", wheelListener);
-
-		return () => {
-			document.removeEventListener("wheel", wheelListener);
-		};
-	});
+	};
 }
 
 export default useWheelOnce;
