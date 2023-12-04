@@ -6,11 +6,16 @@
 	box-sizing: border-box;
 }
 
-#root {
+body {
 	width: 100vw;
 	height: 100vh;
 	overflow-y: hidden;
 	overflow-x: hidden;
+}
+
+#root {
+	width: 100%;
+	height: 100%;
 }
 
 .mys-multiscroll-nav {
@@ -53,7 +58,7 @@
 }
 
 @media screen and (max-width: 768px) {
-	#root {
+	body {
 		width: auto;
 		height: auto;
 		overflow-y: visible;

@@ -9,6 +9,7 @@ import NavButtonsContainer from "./components/NavigationButton/Container";
 import isDekstopView from "./utils/isDekstopView";
 import useThrottle from "./hooks/useThrottle";
 import useDebounce from "./hooks/useDebounce";
+import useWheelOnce from "./hooks/useWheelOnce";
 
 const TOTAL_SLIDE = 12;
 const FULL_SLIDE_NUMBERS = [0, 2, 7];
@@ -31,13 +32,38 @@ function App() {
 	const throttleKeyboardNav = useThrottle(keydownNavigateHandler, 610);
 	const debouncedResizeHandler = useDebounce(setViewportSizeStatus, 300);
 
+	useWheelOnce(wheelNavigation);
+
+	function wheelNavigation(direction) {
+		if (isDekstopView === false) return;
+		if (isSlideNavigating === true) return;
+
+		setSlideNavigatingProcess(true);
+
+		if (direction === "bottom") {
+			if (currentActiveSlideNumber !== positionLists.length - 1) {
+				oneTimeSlideNavigate("bottom");
+				setCurrentActiveSlideNumber((prevState) => prevState + 1);
+			}
+		}
+
+		if (direction === "top") {
+			if (currentActiveSlideNumber !== 0) {
+				oneTimeSlideNavigate("top");
+				setCurrentActiveSlideNumber((prevState) => prevState - 1);
+			}
+		}
+
+		setSlideNavigatingProcess(false);
+	}
+
 	useEffect(() => {
 		setViewportSizeStatus();
 
-		window.addEventListener("resize", debouncedResizeHandler);
+		document.addEventListener("resize", debouncedResizeHandler);
 
 		return () => {
-			window.removeEventListener("resize", debouncedResizeHandler);
+			document.removeEventListener("resize", debouncedResizeHandler);
 		};
 	}, []);
 
