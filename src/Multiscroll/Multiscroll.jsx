@@ -1,15 +1,16 @@
+import "./css/index.css";
 import { useState, useEffect } from "react";
 
-import SlidesContainer from "../Slide/Container";
-import MultiSlide from "../Slide/MultiSlide";
-import FullSlide from "../Slide/FullSlide";
-import NavButton from "../NavigationButton/Button";
-import NavButtonsContainer from "../NavigationButton/Container";
+import SlidesContainer from "./components/Slide/Container";
+import MultiSlide from "./components/Slide/MultiSlide";
+import FullSlide from "./components/Slide/FullSlide";
+import NavButton from "./components/NavigationButton/Button";
+import NavButtonsContainer from "./components/NavigationButton/Container";
 
-import useThrottle from "../../hooks/useThrottle";
-import useDebounce from "../../hooks/useDebounce";
-import useWheelOnce from "../../hooks/useWheelOnce";
-import isDekstopView from "../../utils/isDekstopView";
+import useThrottle from "./hooks/useThrottle";
+import useDebounce from "./hooks/useDebounce";
+import useWheelOnce from "./hooks/useWheelOnce";
+import isDekstopView from "./utils/isDekstopView";
 
 const TOTAL_SLIDE = 12;
 const FULL_SLIDE_NUMBERS = [0, 2, 7];

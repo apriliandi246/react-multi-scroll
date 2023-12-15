@@ -1,4 +1,4 @@
-import Multiscroll from "./components/Multiscroll/Multiscroll";
+import Multiscroll from "./Multiscroll/Multiscroll";
 
 function App() {
 	return (
