@@ -3,18 +3,18 @@ import { render, screen, prettyDOM } from "@testing-library/react";
 
 import Container from "../Container";
 
-describe("Slides container", () => {
+describe("NavigationButton container", () => {
 	test("render child element inside the container", () => {
-		const childElementText = "Hello World";
+		const childElementText = "to slide 4";
 
 		render(
 			<Container>
-				<h1>{childElementText}</h1>
+				<button aria-label={childElementText}></button>
 			</Container>
 		);
 
-		const childElement = screen.getByText(childElementText);
-		const containerElement = screen.getByRole("main");
+		const childElement = screen.getByRole("button", { name: childElementText });
+		const containerElement = document.querySelector(".mys-multiscroll-nav");
 
 		expect(childElement).toBeInTheDocument();
 		expect(containerElement).toContainElement(childElement);
